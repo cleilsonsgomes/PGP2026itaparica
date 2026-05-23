@@ -1,0 +1,567 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard PTDS × PGP — Território Itaparica</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --vermelho:#E63329; --vermelho-d:#C62828;
+    --azul:#1F3A6D; --azul-c:#2E5BA8;
+    --verde:#3CB54A; --verde-d:#2E8B3D;
+    --laranja:#F07C2E;
+    --fundo:#D8E2D6; --papel:#FFFFFF;
+    --tinta:#1F2D24; --cinza:#6B7B72;
+    --tab-verde:#DDEBD8; --tab-rosa:#FBD9D6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Trebuchet MS','Segoe UI',Arial,sans-serif;
+    background:var(--fundo); color:var(--tinta);
+    padding:0 0 60px;
+  }
+  /* ---- FAIXA DE TOPO estilo capa PGP ---- */
+  .topo{
+    background:var(--vermelho);
+    position:relative; overflow:hidden;
+    padding:34px 40px 30px;
+  }
+  .topo::after{
+    content:""; position:absolute; right:-60px; top:-40px;
+    width:260px; height:260px; border-radius:50%;
+    background:repeating-radial-gradient(circle, transparent 0 9px, rgba(255,255,255,.13) 9px 12px);
+  }
+  .topo .tag{
+    display:inline-block; background:var(--azul); color:#fff;
+    font-size:11px; font-weight:bold; letter-spacing:2.5px;
+    padding:6px 16px; border-radius:14px; margin-bottom:14px;
+  }
+  .topo h1{
+    color:#fff; font-size:34px; line-height:1.1; font-weight:800;
+    letter-spacing:.5px; position:relative; z-index:2;
+  }
+  .topo h1 em{ color:#FFD7A8; font-style:italic; font-weight:600;}
+  .topo .sub{
+    color:#FFE3E0; font-size:14px; margin-top:8px; font-weight:600;
+    position:relative; z-index:2;
+  }
+  .chevron{
+    height:10px;
+    background:linear-gradient(135deg,var(--verde) 25%,transparent 25%) -10px 0/20px 20px,
+               var(--azul);
+  }
+  /* ---- NAV ABAS ---- */
+  .navabas{
+    display:flex;gap:6px;background:var(--azul);padding:0 24px;
+    flex-wrap:wrap;
+  }
+  .navabas button{
+    background:transparent;border:none;cursor:pointer;
+    color:#A9BCD8;font-family:inherit;font-size:13px;font-weight:bold;
+    padding:14px 20px;border-bottom:4px solid transparent;
+    transition:color .12s,border-color .12s;letter-spacing:.3px;
+  }
+  .navabas button:hover{color:#fff;}
+  .navabas button.ativa{color:#fff;border-bottom-color:var(--verde);}
+  .pagina{display:none;}
+  .pagina.ativa{display:block;}
+  /* ---- PASSO A PASSO ---- */
+  .chamada{
+    background:linear-gradient(100deg,var(--verde),var(--verde-d));
+    color:#fff;border-radius:12px;padding:22px 26px;margin-bottom:24px;
+    box-shadow:0 4px 12px rgba(46,139,61,.28);
+  }
+  .chamada h3{font-size:18px;font-weight:800;margin-bottom:6px;}
+  .chamada p{font-size:13.5px;line-height:1.5;opacity:.95;}
+  .passo{
+    display:flex;gap:16px;background:var(--papel);border-radius:12px;
+    padding:18px 20px;margin-bottom:14px;
+    box-shadow:0 3px 10px rgba(31,58,109,.10);
+    border-left:5px solid var(--azul-c);
+  }
+  .passo .pn{
+    background:var(--azul);color:#fff;font-weight:800;font-size:18px;
+    width:40px;height:40px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .passo .pc h4{font-size:14px;color:var(--azul);font-weight:800;margin-bottom:5px;}
+  .passo .pc p{font-size:12.5px;color:#3C4A42;line-height:1.5;}
+  .passo .pc p b{color:var(--vermelho-d);}
+  .campos{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;
+  }
+  .campo-item{
+    font-size:11.5px;background:var(--tab-verde);border-radius:7px;
+    padding:7px 10px;color:#2E4A33;
+  }
+  .campo-item b{color:var(--azul);}
+  .campo-item.opc{background:#EEF1ED;color:var(--cinza);}
+  .obs-lgpd{
+    background:#EAF1FA;border-left:5px solid var(--azul-c);
+    border-radius:8px;padding:14px 18px;font-size:12px;color:#33445C;
+    line-height:1.5;margin-top:6px;
+  }
+  .cta-final{
+    text-align:center;margin-top:22px;
+  }
+  .cta-final a{
+    display:inline-block;background:var(--vermelho);color:#fff;
+    font-size:15px;font-weight:800;text-decoration:none;letter-spacing:.4px;
+    padding:15px 36px;border-radius:28px;
+    box-shadow:0 5px 16px rgba(230,51,41,.35);
+    transition:transform .12s;
+  }
+  .cta-final a:hover{transform:translateY(-2px);}
+  .cta-final .micro{
+    display:block;margin-top:10px;font-size:11px;color:var(--cinza);
+  }
+  /* ---- LAYOUT ---- */
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+  .secao-titulo{
+    display:flex;align-items:center;gap:12px;
+    margin:36px 0 18px;
+  }
+  .secao-titulo .num{
+    background:var(--azul);color:#fff;font-weight:800;font-size:15px;
+    width:30px;height:30px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .secao-titulo h2{
+    color:var(--azul);font-size:17px;font-weight:800;letter-spacing:.4px;
+    text-transform:uppercase;
+  }
+  /* ---- KPIs ---- */
+  .kpis{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+  }
+  .kpi{
+    background:var(--papel);border-radius:12px;padding:18px 16px;
+    box-shadow:0 3px 10px rgba(31,58,109,.10);
+    border-top:5px solid var(--verde);
+    text-align:center;
+  }
+  .kpi:nth-child(2){border-top-color:var(--vermelho);}
+  .kpi:nth-child(3){border-top-color:var(--azul-c);}
+  .kpi:nth-child(4){border-top-color:var(--laranja);}
+  .kpi:nth-child(5){border-top-color:var(--verde-d);}
+  .kpi .big{font-size:38px;font-weight:800;line-height:1;color:var(--azul);}
+  .kpi .lbl{font-size:11.5px;color:var(--cinza);margin-top:8px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.3px;}
+  /* ---- CARDS GRÁFICOS ---- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .grid3{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;}
+  .card{
+    background:var(--papel);border-radius:12px;padding:20px 22px;
+    box-shadow:0 3px 10px rgba(31,58,109,.10);
+  }
+  .card h3{
+    font-size:13.5px;color:var(--azul);font-weight:800;margin-bottom:4px;
+    text-transform:uppercase;letter-spacing:.3px;
+  }
+  .card .desc{font-size:11.5px;color:var(--cinza);margin-bottom:14px;}
+  .chart-box{position:relative;height:280px;}
+  .chart-box.tall{height:380px;}
+  /* ---- TABELA EIXOS ---- */
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead th{
+    background:var(--azul);color:#fff;padding:9px 10px;text-align:left;
+    font-size:11px;letter-spacing:.4px;text-transform:uppercase;
+  }
+  tbody td{padding:8px 10px;border-bottom:1px solid #E4EAE2;}
+  tbody tr:nth-child(even){background:#F4F7F3;}
+  .bar-cell{display:flex;align-items:center;gap:8px;}
+  .bar{height:14px;border-radius:3px;background:var(--verde);}
+  .pill{
+    display:inline-block;padding:2px 9px;border-radius:10px;
+    font-size:10.5px;font-weight:bold;
+  }
+  .pill.ok{background:var(--tab-verde);color:var(--verde-d);}
+  .pill.lim{background:#FFE9C7;color:#B5651D;}
+  /* ---- PONTOS DE ATENÇÃO ---- */
+  .alertas{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .alerta{
+    background:var(--papel);border-radius:10px;padding:14px 16px;
+    border-left:5px solid var(--laranja);font-size:12px;
+    box-shadow:0 2px 6px rgba(31,58,109,.08);
+  }
+  .alerta.dup{border-left-color:var(--vermelho);}
+  .alerta b{color:var(--azul);display:block;margin-bottom:4px;font-size:12.5px;}
+  .alerta span{color:var(--cinza);line-height:1.45;}
+  /* ---- RODAPÉ ---- */
+  .rodape{
+    text-align:center;margin-top:40px;font-size:11px;color:var(--cinza);
+    border-top:2px dashed #B9C7B5;padding-top:18px;
+  }
+  .rodape .municipios{
+    display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;
+  }
+  .rodape .municipios span{
+    background:var(--azul);color:#fff;padding:3px 12px;border-radius:11px;
+    font-weight:bold;font-size:10.5px;
+  }
+  .rodape .credito{
+    margin-top:14px;padding-top:12px;border-top:1px solid #C2D0BE;
+    font-size:11.5px;color:var(--azul);
+  }
+  .rodape .credito b{color:var(--azul);font-weight:800;}
+  /* ---- BOTÃO EXCEL ---- */
+  .btn-xls{
+    position:absolute; right:40px; top:34px; z-index:3;
+    display:inline-flex; align-items:center; gap:8px;
+    background:#fff; color:var(--azul);
+    font-size:12px; font-weight:bold; letter-spacing:.3px;
+    padding:10px 18px; border-radius:22px; text-decoration:none;
+    box-shadow:0 4px 12px rgba(0,0,0,.22);
+    transition:transform .12s, box-shadow .12s;
+  }
+  .btn-xls:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.30); }
+  .btn-xls .ic{
+    background:var(--verde-d); color:#fff; font-size:10px; font-weight:800;
+    padding:3px 6px; border-radius:5px; letter-spacing:.5px;
+  }
+  .link-inline{
+    display:inline-flex; align-items:center; gap:7px;
+    background:var(--tab-verde); color:var(--verde-d);
+    font-size:11.5px; font-weight:bold; text-decoration:none;
+    padding:7px 14px; border-radius:8px; margin-bottom:14px;
+    border:1px solid #C2D8BC; transition:background .12s;
+  }
+  .link-inline:hover{ background:#CFE3CA; }
+  @media(max-width:880px){
+    .btn-xls{ position:static; display:inline-flex; margin-top:14px; }
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .grid2,.grid3,.alertas{grid-template-columns:1fr;}
+    .topo h1{font-size:25px;}
+  }
+</style>
+
+<div class="topo">
+  <a class="btn-xls" href="Matriz_PTDS_x_PGP_Itaparica.xlsx" download>
+    <span class="ic">XLSX</span> Abrir matriz completa
+  </a>
+  <span class="tag">PGP 2026 · ENCONTROS PARA O FUTURO</span>
+  <h1>Dashboard de Propostas <em>do Território</em><br>PTDS × Programa de Governo Participativo</h1>
+  <div class="sub">TERRITÓRIO DE IDENTIDADE ITAPARICA · Ciclo 2027–2030</div>
+</div>
+<div class="chevron"></div>
+
+<div class="navabas">
+  <button class="ativa" onclick="abrir('pgDash',this)">Dashboard de Propostas</button>
+  <button onclick="abrir('pgGuia',this)">Como Inserir Propostas — Passo a Passo</button>
+</div>
+
+<div class="pagina ativa" id="pgDash">
+<div class="wrap">
+
+  <!-- KPIs -->
+  <div class="secao-titulo">
+    <span class="num">1</span><h2>Panorama Geral</h2>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="big">102</div><div class="lbl">Propostas mapeadas</div></div>
+    <div class="kpi"><div class="big">12</div><div class="lbl">Áreas do PTDS</div></div>
+    <div class="kpi"><div class="big">29</div><div class="lbl">Eixos do PGP atingidos</div></div>
+    <div class="kpi"><div class="big">10</div><div class="lbl">Duplicatas a consolidar</div></div>
+    <div class="kpi"><div class="big">0</div><div class="lbl">Eixos acima do limite</div></div>
+  </div>
+
+  <!-- AGRUPAMENTOS + TIPO -->
+  <div class="secao-titulo">
+    <span class="num">2</span><h2>Distribuição das Propostas</h2>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Propostas por Agrupamento do PGP</h3>
+      <p class="desc">Como as 102 propostas do PTDS se distribuem nos 4 agrupamentos da plataforma de escuta.</p>
+      <div class="chart-box"><canvas id="chAgr"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Tipo de Relação com o PGP</h3>
+      <p class="desc">Natureza de cada proposta frente às entregas já registradas (2007–2026).</p>
+      <div class="chart-box"><canvas id="chTipo"></canvas></div>
+    </div>
+  </div>
+
+  <!-- EIXOS MAIS DEMANDADOS -->
+  <div class="secao-titulo">
+    <span class="num">3</span><h2>Eixos Mais Demandados</h2>
+  </div>
+  <div class="grid3">
+    <div class="card">
+      <h3>Top 12 Eixos do PGP por nº de propostas</h3>
+      <p class="desc">Limite de 10 sugestões por eixo. Segurança Pública está no limite exato.</p>
+      <div class="chart-box tall"><canvas id="chEixo"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Propostas por Área do PTDS</h3>
+      <p class="desc">Origem das propostas nas 12 abas do Quadro Analítico Propositivo.</p>
+      <div class="chart-box tall"><canvas id="chAba"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TABELA OCUPAÇÃO -->
+  <div class="secao-titulo">
+    <span class="num">4</span><h2>Ocupação dos Eixos vs. Limite de 10</h2>
+  </div>
+  <div class="card">
+    <a class="link-inline" href="Matriz_PTDS_x_PGP_Itaparica.xlsx" download>
+      ▼ Ver as 102 propostas detalhadas na planilha (aba "Matriz PTDS x PGP")
+    </a>
+    <table>
+      <thead><tr>
+        <th style="width:32%">Eixo do PGP</th>
+        <th style="width:48%">Ocupação</th>
+        <th style="width:12%">Propostas</th>
+        <th style="width:8%">Status</th>
+      </tr></thead>
+      <tbody id="tabEixo"></tbody>
+    </table>
+  </div>
+
+  <!-- PONTOS DE ATENÇÃO -->
+  <div class="secao-titulo">
+    <span class="num">5</span><h2>Pontos de Atenção para a Curadoria</h2>
+  </div>
+  <div class="alertas" id="alertas"></div>
+
+  <div class="rodape">
+    Fonte: Quadro Analítico Propositivo do PTDS Itaparica × Cadernos Territoriais PGP 2026.<br>
+    Classificação por aderência temática — sujeita a revisão na fase de curadoria.
+    <div class="municipios">
+      <span>Abaré</span><span>Chorrochó</span><span>Glória</span>
+      <span>Macururé</span><span>Paulo Afonso</span><span>Rodelas</span>
+    </div>
+    <div class="credito">
+      Dashboard desenvolvido pela <b>Secretaria Municipal de Tecnologia e Inovação de Paulo Afonso&nbsp;–&nbsp;BA</b>
+    </div>
+  </div>
+</div>
+</div><!-- fim pgDash -->
+
+<!-- ============ PÁGINA: GUIA PASSO A PASSO ============ -->
+<div class="pagina" id="pgGuia">
+<div class="wrap">
+
+  <div class="chamada">
+    <h3>📢 Sua proposta constrói o futuro do Território Itaparica</h3>
+    <p>A escuta do PGP 2026 só vira política pública se as pessoas participarem.
+    <b>Quanto mais moradores, lideranças e entidades inserirem propostas, mais forte fica o
+    Território Itaparica na disputa por recursos do Governo do Estado para 2027–2030.</b>
+    Cada sugestão registrada é uma demanda do nosso território levada diretamente ao planejamento estadual.
+    Convide outras pessoas — vizinhos, colegas, associações e coletivos — para participar também.</p>
+  </div>
+
+  <div class="secao-titulo">
+    <span class="num">1</span><h2>Onde Inserir as Propostas</h2>
+  </div>
+  <div class="card" style="text-align:center;">
+    <p style="font-size:13px;color:#3C4A42;margin-bottom:12px;">
+      Toda a inserção é feita na plataforma oficial de escuta digital do Território Itaparica:</p>
+    <a class="link-inline" href="https://www.pgpdigital.com.br/escuta/itaparica" target="_blank"
+       style="font-size:13px;padding:10px 20px;">
+      🔗 www.pgpdigital.com.br/escuta/itaparica
+    </a>
+    <p style="font-size:11.5px;color:#6B7B72;margin-top:12px;">
+      Acesse por celular ou computador. O preenchimento leva poucos minutos por proposta.</p>
+  </div>
+
+  <div class="secao-titulo">
+    <span class="num">2</span><h2>Etapa 1 — Cadastro do Participante</h2>
+  </div>
+  <div class="card">
+    <p style="font-size:12.5px;color:#3C4A42;margin-bottom:6px;">
+      Antes de enviar sugestões, a plataforma pede um cadastro rápido. Tenha em mãos os
+      dados abaixo. Os campos marcados com <b style="color:#E63329;">*</b> são
+      <b>obrigatórios</b>:</p>
+    <div class="campos">
+      <div class="campo-item"><b>Nome Completo *</b> — nome do participante</div>
+      <div class="campo-item"><b>CPF *</b> — somente um CPF por pessoa</div>
+      <div class="campo-item"><b>Data de Nascimento *</b> — dd/mm/aaaa</div>
+      <div class="campo-item"><b>Celular / WhatsApp *</b> — com DDD</div>
+      <div class="campo-item"><b>Cidade *</b> — selecione o município (ex.: Paulo Afonso)</div>
+      <div class="campo-item"><b>Sexo *</b> — selecione na lista</div>
+      <div class="campo-item"><b>Gênero *</b> — selecione na lista</div>
+      <div class="campo-item"><b>Raça/Cor *</b> — selecione na lista</div>
+      <div class="campo-item"><b>Território</b> — selecione "Itaparica"</div>
+      <div class="campo-item opc">Zona — urbana ou rural (opcional)</div>
+    </div>
+    <div class="obs-lgpd">
+      <b>Consentimento obrigatório:</b> ao final do cadastro, marque a caixa
+      <i>"Li e concordo com o Termo de Consentimento de Uso de Dados"</i> e clique em
+      <b>"Participar da Escuta"</b>. Os dados são tratados conforme a LGPD (Lei nº 13.709/2018)
+      e usados para pesquisa, análise estatística e elaboração de políticas públicas do PGP.
+    </div>
+  </div>
+
+  <div class="secao-titulo">
+    <span class="num">3</span><h2>Etapa 2 — Inserindo as Propostas por Eixo</h2>
+  </div>
+
+  <div class="passo">
+    <div class="pn">1</div>
+    <div class="pc">
+      <h4>Acesse "Suas Sugestões"</h4>
+      <p>Após o cadastro, a plataforma abre a tela <b>"Suas Sugestões"</b>, onde é possível
+      editar sugestões pendentes ou adicionar novas nos eixos que ainda não participou.</p>
+    </div>
+  </div>
+
+  <div class="passo">
+    <div class="pn">2</div>
+    <div class="pc">
+      <h4>Escolha um dos 4 Agrupamentos</h4>
+      <p>As propostas são organizadas em 4 grandes agrupamentos. Toque naquele que tem relação
+      com a sua proposta:</p>
+      <div class="campos">
+        <div class="campo-item"><b>1 · Temas Transversais Prioritários</b> — 5 eixos</div>
+        <div class="campo-item"><b>2 · Desenvolvimento Econômico</b> — 10 eixos</div>
+        <div class="campo-item"><b>3 · Desenv. Social e Garantias de Direitos</b> — 18 eixos</div>
+        <div class="campo-item"><b>4 · Governança Democrática</b> — 12 eixos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="passo">
+    <div class="pn">3</div>
+    <div class="pc">
+      <h4>Selecione o Eixo correto</h4>
+      <p>Dentro do agrupamento, abre-se a lista de eixos. Escolha o eixo que melhor representa
+      o tema da sua proposta — por exemplo, <i>Saúde</i>, <i>Cultura</i>,
+      <i>Segurança Pública e Prevenção à Violência</i>, <i>Convivência com o Semiárido</i>.
+      <b>Consulte a aba "Dashboard de Propostas" deste material</b> para ver em qual eixo cada
+      tema do PTDS se encaixa.</p>
+    </div>
+  </div>
+
+  <div class="passo">
+    <div class="pn">4</div>
+    <div class="pc">
+      <h4>Toque em "+ nova" e escreva a proposta</h4>
+      <p>Ao lado de cada eixo há o botão <b>"+ nova"</b>. Clique nele e descreva a sugestão
+      de forma <b>clara e objetiva</b>: qual é o problema, o que se propõe e qual município
+      ou comunidade será beneficiado. Propostas bem descritas têm mais força na curadoria.</p>
+    </div>
+  </div>
+
+  <div class="passo">
+    <div class="pn">5</div>
+    <div class="pc">
+      <h4>Salve e repita em outros eixos</h4>
+      <p>Salve a proposta. É possível inserir sugestões em <b>vários eixos diferentes</b> —
+      basta voltar à tela "Suas Sugestões" e repetir o processo. <b>Atenção:</b> são aceitas
+      <b>até 10 sugestões por eixo</b>; se um tema já tiver muitas propostas, priorize as
+      mais importantes.</p>
+    </div>
+  </div>
+
+  <div class="cta-final">
+    <a href="https://www.pgpdigital.com.br/escuta/itaparica" target="_blank">
+      → Participar da Escuta agora
+    </a>
+    <span class="micro">Cada proposta conta. Participe e mobilize mais pessoas do seu município!</span>
+  </div>
+
+  <div class="rodape">
+    Guia de orientação para a escuta do PGP 2026 — Território de Identidade Itaparica.
+    <div class="municipios">
+      <span>Abaré</span><span>Chorrochó</span><span>Glória</span>
+      <span>Macururé</span><span>Paulo Afonso</span><span>Rodelas</span>
+    </div>
+    <div class="credito">
+      Material desenvolvido pela <b>Secretaria Municipal de Tecnologia e Inovação de Paulo Afonso&nbsp;–&nbsp;BA</b>
+    </div>
+  </div>
+
+</div>
+</div><!-- fim pgGuia -->
+
+<script>
+function abrir(id,btn){
+  document.querySelectorAll('.pagina').forEach(p=>p.classList.remove('ativa'));
+  document.querySelectorAll('.navabas button').forEach(b=>b.classList.remove('ativa'));
+  document.getElementById(id).classList.add('ativa');
+  btn.classList.add('ativa');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+const C={vermelho:'#E63329',azul:'#1F3A6D',azulc:'#2E5BA8',verde:'#3CB54A',
+         verded:'#2E8B3D',laranja:'#F07C2E',cinza:'#6B7B72'};
+Chart.defaults.font.family="'Trebuchet MS',Arial,sans-serif";
+Chart.defaults.font.size=11;
+
+// ---- AGRUPAMENTOS (donut) ----
+new Chart(chAgr,{type:'doughnut',
+ data:{labels:['Desenv. Social e Garantias de Direitos','Desenvolvimento Econômico',
+        'Temas Transversais Prioritários','Governança Democrática'],
+   datasets:[{data:[41,31,20,10],
+     backgroundColor:[C.azul,C.verde,C.vermelho,C.laranja],borderColor:'#fff',borderWidth:3}]},
+ options:{maintainAspectRatio:false,cutout:'58%',
+   plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:10,font:{size:10.5}}}}}});
+
+// ---- TIPO DE RELAÇÃO (donut) ----
+new Chart(chTipo,{type:'doughnut',
+ data:{labels:['Proposta nova','Amplia entrega existente','Complementa entrega/programa','Duplicata a consolidar'],
+   datasets:[{data:[80,7,5,10],
+     backgroundColor:[C.verde,C.azulc,C.laranja,C.vermelho],borderColor:'#fff',borderWidth:3}]},
+ options:{maintainAspectRatio:false,cutout:'58%',
+   plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:10,font:{size:10.5}}}}}});
+
+// ---- TOP EIXOS (barra horizontal) ----
+const eixoData=[['Segurança Pública e Prevenção à Violência',10],['Mulheres',9],['Saúde',8],
+ ['População Indígena e Povos Tradicionais',7],['Cultura',7],['Convivência com o Semiárido',5],
+ ['Sustentabilidade ambiental',5],['Trabalho, Geração de Emprego e Renda',4],
+ ['Desenvolvimento do Agronegócio',4],['Indústria, Comércio e Serviços',4],
+ ['Infraestrutura, Logística e Mobilidade',4],['Capacidade de Governo e Gestão de Pessoas',4]];
+new Chart(chEixo,{type:'bar',
+ data:{labels:eixoData.map(e=>e[0]),
+   datasets:[{data:eixoData.map(e=>e[1]),
+     backgroundColor:eixoData.map(e=>e[1]>=10?C.vermelho:C.azulc),borderRadius:4}]},
+ options:{indexAxis:'y',maintainAspectRatio:false,
+   plugins:{legend:{display:false}},
+   scales:{x:{beginAtZero:true,max:11,grid:{color:'#EEF1ED'},
+     ticks:{stepSize:2}},
+     y:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+// ---- ABAS PTDS (barra) ----
+const abaData=[['12 - Segurança',16],['10 - Meio Ambiente',12],['06 - Desenv. Urbano',11],
+ ['08 - Igualdade Racial',10],['11 - Saúde',10],['02 - Ciência e Tecnologia',9],
+ ['03 - Cultura',9],['05 - Desenv. Rural',8],['04 - Desenv. Produtivo',7],
+ ['09 - Logística',6],['01 - Assistência Social',2],['13 - Gestão e Governança',2]];
+new Chart(chAba,{type:'bar',
+ data:{labels:abaData.map(e=>e[0]),
+   datasets:[{data:abaData.map(e=>e[1]),backgroundColor:C.verde,borderRadius:4}]},
+ options:{indexAxis:'y',maintainAspectRatio:false,
+   plugins:{legend:{display:false}},
+   scales:{x:{beginAtZero:true,grid:{color:'#EEF1ED'}},
+     y:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+// ---- TABELA OCUPAÇÃO ----
+const tab=eixoData.concat([['Desenvolvimento Rural e Acesso à Terra',4],
+ ['Ciência e Tecnologia',3],['Tecnologia e inovação (incluindo IA)',3],
+ ['Planejamento Governamental',3],['Direitos dos animais',3]]);
+const tbody=document.getElementById('tabEixo');
+tab.forEach(([nome,n])=>{
+  const pct=Math.min(n/10*100,100);
+  const lim=n>=10;
+  tbody.insertAdjacentHTML('beforeend',
+   `<tr><td>${nome}</td>
+    <td><div class="bar-cell"><div class="bar" style="width:${pct*1.6}px;background:${lim?C.vermelho:C.verde}"></div>
+      <span style="font-size:10.5px;color:#6B7B72">${n}/10</span></div></td>
+    <td><b>${n}</b></td>
+    <td><span class="pill ${lim?'lim':'ok'}">${lim?'NO LIMITE':'OK'}</span></td></tr>`);
+});
+
+// ---- PONTOS DE ATENÇÃO ----
+const alertas=[
+ ['dup','Casa Abrigo da Mulher','Repetida nas abas 08 (Igualdade Racial) e 12 (Segurança). Consolidar numa única proposta no eixo Mulheres.'],
+ ['dup','Habitação de Interesse Social','Texto idêntico nas abas 06 e 13. Consolidar no eixo Habitação.'],
+ ['dup','Extensão Rural / Agronegócio','Repetida em 3 abas (02, 04 e 05). Manter na aba 05 — Desenv. Rural e Acesso à Terra.'],
+ ['dup','Formação Técnica Operacional','Repetida nas abas 02 e 04. Consolidar em Trabalho, Geração de Emprego e Renda.'],
+ ['','Polícia Ambiental × Batalhão Ambiental','Sobreposição entre abas 10 e 12 — avaliar fusão das duas propostas.'],
+ ['','Eixo Segurança Pública no limite','Com 10 propostas, qualquer item novo exigirá priorização e marcação de excedente.'],
+ ['','Eixo Mulheres carregado (9)','Itens de infraestrutura da DEAM podem caber melhor em Segurança Pública — revisar.'],
+ ['','Eixos do PGP sem proposta','Cuidado e Redução de Danos, População Idosa, Pesca, Comunicação, Finanças e Compras Públicas — oportunidade de complementação.']
+];
+const albox=document.getElementById('alertas');
+alertas.forEach(([cls,t,d])=>{
+  albox.insertAdjacentHTML('beforeend',
+   `<div class="alerta ${cls}"><b>${t}</b><span>${d}</span></div>`);
+});
+</script>
