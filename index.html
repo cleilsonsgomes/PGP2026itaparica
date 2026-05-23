@@ -225,7 +225,35 @@
     border:1px solid #C2D8BC; transition:background .12s;
   }
   .link-inline:hover{ background:#CFE3CA; }
+  /* ---- DOWNLOADS DOCUMENTOS ---- */
+  .docs{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:14px;
+  }
+  .doc{
+    display:flex;flex-direction:column;
+    background:var(--papel);border-radius:12px;padding:18px 18px 16px;
+    box-shadow:0 3px 10px rgba(31,58,109,.10);
+    border-top:5px solid var(--vermelho);text-decoration:none;
+    transition:transform .12s, box-shadow .12s;
+  }
+  .doc:hover{transform:translateY(-3px);box-shadow:0 7px 16px rgba(31,58,109,.20);}
+  .doc.xls{border-top-color:var(--verde-d);}
+  .doc.matriz{border-top-color:var(--azul-c);}
+  .doc .dtag{
+    align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.5px;
+    color:#fff;background:var(--vermelho);padding:3px 8px;border-radius:5px;
+  }
+  .doc.xls .dtag{background:var(--verde-d);}
+  .doc.matriz .dtag{background:var(--azul-c);}
+  .doc h4{font-size:13.5px;color:var(--azul);font-weight:800;margin:10px 0 4px;}
+  .doc p{font-size:11.5px;color:var(--cinza);line-height:1.45;flex-grow:1;}
+  .doc .baixar{
+    margin-top:12px;font-size:11.5px;font-weight:bold;color:var(--vermelho-d);
+  }
+  .doc.xls .baixar{color:var(--verde-d);}
+  .doc.matriz .baixar{color:var(--azul-c);}
   @media(max-width:880px){
+    .docs{grid-template-columns:1fr;}
     .btn-xls{ position:static; display:inline-flex; margin-top:14px; }
     .kpis{grid-template-columns:repeat(2,1fr);}
     .grid2,.grid3,.alertas{grid-template-columns:1fr;}
@@ -263,9 +291,40 @@
     <div class="kpi"><div class="big">0</div><div class="lbl">Eixos acima do limite</div></div>
   </div>
 
+  <!-- DOCUMENTOS DE REFERÊNCIA -->
+  <div class="secao-titulo">
+    <span class="num">2</span><h2>Documentos de Referência — Download</h2>
+  </div>
+  <div class="docs">
+    <a class="doc" href="PGP_CadernosTerritoriais_ITAPARICA.pdf" download>
+      <span class="dtag">PDF</span>
+      <h4>Caderno Territorial — PGP 2026</h4>
+      <p>Documento oficial do PGP 2026 com a prestação de contas das entregas do Governo do Estado no Território Itaparica (2007–2026).</p>
+      <span class="baixar">↓ Baixar PDF</span>
+    </a>
+    <a class="doc" href="PTDS_ITAPARICA.pdf" download>
+      <span class="dtag">PDF</span>
+      <h4>PTDS — Território Itaparica</h4>
+      <p>Plano Territorial de Desenvolvimento Sustentável, elaborado pela SEPLAN de forma participativa em todo o território.</p>
+      <span class="baixar">↓ Baixar PDF</span>
+    </a>
+    <a class="doc matriz" href="Matriz_PTDS_x_PGP_Itaparica.xlsx" download>
+      <span class="dtag">XLSX</span>
+      <h4>Matriz de Análise PTDS × PGP</h4>
+      <p>Cruzamento das 102 propostas do PTDS com os eixos do PGP, indicando onde inserir cada proposta na plataforma.</p>
+      <span class="baixar">↓ Baixar planilha</span>
+    </a>
+    <a class="doc xls" href="PTDS-QUADRO_ANALITICO.xlsx" download>
+      <span class="dtag">XLSX</span>
+      <h4>PTDS — Quadro Analítico Propositivo</h4>
+      <p>Planilha original do PTDS com as propostas do território organizadas por área de política pública.</p>
+      <span class="baixar">↓ Baixar planilha</span>
+    </a>
+  </div>
+
   <!-- AGRUPAMENTOS + TIPO -->
   <div class="secao-titulo">
-    <span class="num">2</span><h2>Distribuição das Propostas</h2>
+    <span class="num">3</span><h2>Distribuição das Propostas</h2>
   </div>
   <div class="grid2">
     <div class="card">
@@ -282,7 +341,7 @@
 
   <!-- EIXOS MAIS DEMANDADOS -->
   <div class="secao-titulo">
-    <span class="num">3</span><h2>Eixos Mais Demandados</h2>
+    <span class="num">4</span><h2>Eixos Mais Demandados</h2>
   </div>
   <div class="grid3">
     <div class="card">
@@ -299,7 +358,7 @@
 
   <!-- TABELA OCUPAÇÃO -->
   <div class="secao-titulo">
-    <span class="num">4</span><h2>Ocupação dos Eixos vs. Limite de 10</h2>
+    <span class="num">5</span><h2>Ocupação dos Eixos vs. Limite de 10</h2>
   </div>
   <div class="card">
     <a class="link-inline" href="Matriz_PTDS_x_PGP_Itaparica.xlsx" download>
@@ -318,7 +377,7 @@
 
   <!-- PONTOS DE ATENÇÃO -->
   <div class="secao-titulo">
-    <span class="num">5</span><h2>Pontos de Atenção para a Curadoria</h2>
+    <span class="num">6</span><h2>Pontos de Atenção para a Curadoria</h2>
   </div>
   <div class="alertas" id="alertas"></div>
 
